@@ -1,4 +1,8 @@
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 import org.bitcoinj.core.*;
+import org.bitcoinj.core.listeners.OnTransactionBroadcastListener;
+import org.bitcoinj.kits.WalletAppKit;
 import org.bitcoinj.net.discovery.DnsDiscovery;
 import org.bitcoinj.params.RegTestParams;
 import org.bitcoinj.params.TestNet3Params;
@@ -7,7 +11,10 @@ import org.bitcoinj.store.BlockStoreException;
 import org.bitcoinj.store.MemoryBlockStore;
 import org.bitcoinj.utils.BriefLogFormatter;
 import org.bitcoinj.utils.MonetaryFormat;
+import org.bitcoinj.wallet.Wallet;
+import org.bitcoinj.wallet.listeners.WalletCoinsReceivedEventListener;
 
+import java.io.File;
 import java.net.InetAddress;
 import java.util.List;
 import java.util.concurrent.Future;
@@ -20,28 +27,9 @@ import java.util.concurrent.Future;
  */
 
 public class Program {
+    static Transaction tx;
+
     public static void main(String[] args) throws Exception {
-        BriefLogFormatter.init();
-
-        // Connect to testnet and find a peer
-        System.out.println("Connecting to node");
-        final NetworkParameters params = RegTestParams.get();
-
-        BlockStore blockStore = new MemoryBlockStore(params);
-        BlockChain chain = new BlockChain(params, blockStore);
-        PeerGroup peerGroup = new PeerGroup(params, chain);
-        PeerAddress addr = new PeerAddress(params, InetAddress.getByAddress(new byte[]{(byte)192, (byte)168, (byte)31, (byte)243}));
-        peerGroup.addAddress(addr);
-        peerGroup.start();
-        peerGroup.waitForPeers(1).get();
-        Peer peer = peerGroup.getConnectedPeers().get(0);
-
-        // Retrieve a block through a peer
-        Sha256Hash blockHash = Sha256Hash.wrap(args[1]);
-        Future<Block> future = peer.getBlock(blockHash);
-        System.out.println("Waiting for node to send us the requested block: " + blockHash);
-        Block block = future.get();
-        System.out.println(block);
-        peerGroup.stopAsync();
+        WalletJ w = new WalletJ();
     }
 }
