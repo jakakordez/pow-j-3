@@ -30,6 +30,7 @@ public class Program {
     static Transaction tx;
 
     public static void main(String[] args) throws Exception {
-        WalletJ w = new WalletJ();
+        Server server = new Server();
+        //WalletJ w = new WalletJ();
     }
 }
