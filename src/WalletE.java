@@ -16,12 +16,19 @@ public class WalletE {
     Snooze contract;
     public WalletE(){
 
+
+
+    }
+boolean ex = false;
+    public void Snooze(){
+        if(ex) return;
+        ex = true;
         final String publicAddress = "0x574Ca674011B15854cA62449Dd8ca3BB68ED6674";
         String privateKey = "287c49337ad1c20b4a3c88d6b7293d13d16ee256010a690fdde53139a836677c";
 
         Web3j web3 = Web3j.build(new HttpService("https://rinkeby.infura.io/v3/fa403f0b3bd04027866a2f8c4eaca953"));
         EthGetBalance ethGetBalance = null;
-        try {
+        /*try {
             ethGetBalance = web3
                     .ethGetBalance("0x574Ca674011B15854cA62449Dd8ca3BB68ED6674", DefaultBlockParameterName.LATEST)
                     .sendAsync()
@@ -32,15 +39,11 @@ public class WalletE {
             e.printStackTrace();
         }
 
-        BigInteger wei = ethGetBalance.getBalance();
+        BigInteger wei = ethGetBalance.getBalance();*/
 
         Credentials credentials = Credentials.create(privateKey);
         contract = Snooze.load("0x93F6B9c4EE1d48F61584e754eA65A5Cd70Ebc1C1", web3, credentials, new BigInteger("1000000000"), new BigInteger("21530"));
 
-
-    }
-
-    public void Snooze(){
         try {
             contract.snooze(new BigInteger("1")).send();
         } catch (Exception e) {
@@ -48,5 +51,6 @@ public class WalletE {
         }
 
         System.out.println("Ma\' nigga!");
+        ex = false;
     }
 }

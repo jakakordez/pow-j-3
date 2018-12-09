@@ -1,3 +1,4 @@
+import com.squareup.okhttp.Response;
 import fi.iki.elonen.NanoHTTPD;
 
 import java.io.IOException;
@@ -24,6 +25,10 @@ WalletE we = new WalletE();
         }
         else if(session.getUri().startsWith("/button")){
             System.out.println("Button clicked");
+            new Thread(() -> {
+                we.Snooze();
+            }).start();
+
             alarmTime = (System.currentTimeMillis()/1000)+30;
             return newFixedLengthResponse("ok\n");
         }
