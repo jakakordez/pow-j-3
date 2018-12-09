@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.Map;
 
 public class Server extends NanoHTTPD {
-
+WalletE we = new WalletE();
     public Server() throws IOException {
         super("0.0.0.0", 8080);
 

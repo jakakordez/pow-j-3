@@ -22,6 +22,6 @@ public class Program {
 
     public static void main(String[] args) throws Exception {
         Server server = new Server();
-        WalletE w = new WalletE();
+        //WalletE w = new WalletE();
     }
 }

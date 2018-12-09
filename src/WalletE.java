@@ -13,6 +13,7 @@ import java.math.BigInteger;
 import java.util.concurrent.ExecutionException;
 
 public class WalletE {
+    Snooze contract;
     public WalletE(){
 
         final String publicAddress = "0x574Ca674011B15854cA62449Dd8ca3BB68ED6674";
@@ -34,8 +35,12 @@ public class WalletE {
         BigInteger wei = ethGetBalance.getBalance();
 
         Credentials credentials = Credentials.create(privateKey);
-        Snooze contract = Snooze.load("0x93F6B9c4EE1d48F61584e754eA65A5Cd70Ebc1C1", web3, credentials, new BigInteger("1000000000"), new BigInteger("21530"));
+        contract = Snooze.load("0x93F6B9c4EE1d48F61584e754eA65A5Cd70Ebc1C1", web3, credentials, new BigInteger("1000000000"), new BigInteger("21530"));
 
+
+    }
+
+    public void Snooze(){
         try {
             contract.snooze(new BigInteger("1")).send();
         } catch (Exception e) {
