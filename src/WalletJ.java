@@ -7,6 +7,7 @@ import org.bitcoinj.params.RegTestParams;
 import org.bitcoinj.store.BlockStore;
 import org.bitcoinj.store.MemoryBlockStore;
 import org.bitcoinj.utils.BriefLogFormatter;
+import org.bitcoinj.wallet.Wallet;
 import org.bitcoinj.wallet.listeners.WalletCoinsReceivedEventListener;
 
 import java.io.File;
@@ -18,25 +19,24 @@ public class WalletJ {
         BriefLogFormatter.init();
 
         // Connect to testnet and find a peer
-            System.out.println("Connecting to node");
-         params = RegTestParams.get();
+        System.out.println("Connecting to node");
+        params = RegTestParams.get();
         BlockStore blockStore = new MemoryBlockStore(params);
         BlockChain chain = new BlockChain(params, blockStore);
         PeerGroup peerGroup = new PeerGroup(params, chain);
         PeerAddress addr = new PeerAddress(params, InetAddress.getByAddress(new byte[]{(byte)192, (byte)168, (byte)31, (byte)243}));
-            peerGroup.addAddress(addr);
-        int p = params.getPort();
-            peerGroup.start();
-            peerGroup.waitForPeers(1).get();
+        peerGroup.addAddress(addr);
+        peerGroup.start();
+        peerGroup.waitForPeers(1).get();
         Peer peer = peerGroup.getConnectedPeers().get(0);
-            peer.addOnTransactionBroadcastListener(new OnTransactionBroadcastListener() {
+        peer.addOnTransactionBroadcastListener(new OnTransactionBroadcastListener() {
             public void onTransaction(Peer peer, Transaction transaction) {
                 System.out.println("Transaction received");
             }
         });
-            System.out.println("Listening");
+        System.out.println("Listening");
         // Retrieve a block through a peer
-            /*Sha256Hash blockHash = Sha256Hash.wrap(args[1]);
+        /*Sha256Hash blockHash = Sha256Hash.wrap(args[1]);
             Future<Block> future = peer.getBlock(blockHash);
             System.out.println("Waiting for node to send us the requested block: " + blockHash);
             Block block = future.get();
@@ -54,17 +54,17 @@ public class WalletJ {
             }
         };
 
-            if (params == RegTestParams.get()) {
+        if (params == RegTestParams.get()) {
             // Regression test mode is designed for testing and development only, so there's no public network for it.
             // If you pick this mode, you're expected to be running a local "bitcoind -regtest" instance.
             kit.connectToLocalHost();
         }
 
-    // Download the block chain and wait until it's done.
-            kit.startAsync();
-            kit.awaitRunning();
-            kit.wallet().addCoinsReceivedEventListener(new WalletCoinsReceivedEventListener() {
-            public void onCoinsReceived(org.bitcoinj.wallet.Wallet w, Transaction tx, Coin prevBalance, Coin newBalance) {
+        // Download the block chain and wait until it's done.
+        kit.startAsync();
+        kit.awaitRunning();
+        kit.wallet().addCoinsReceivedEventListener(new WalletCoinsReceivedEventListener() {
+            public void onCoinsReceived(org.bitcoinj.wallet.Wallet w, final Transaction tx, Coin prevBalance, Coin newBalance) {
                 // Runs in the dedicated "user thread".
                 //
                 // The transaction "tx" can either be pending, or included into a block (we didn't see the broadcast).
@@ -77,11 +77,13 @@ public class WalletJ {
                 // to be double spent, no harm done. WalletJ.allowSpendingUnconfirmedTransactions() would have to
                 // be called in onSetupCompleted() above. But we don't do that here to demonstrate the more common
                 // case of waiting for a block.
-                Futures.addCallback(tx.getConfidence().getDepthFuture(1), new FutureCallback<TransactionConfidence>() {
+                Futures.addCallback(tx.getConfidence().getDepthFuture(6), new FutureCallback<TransactionConfidence>() {
                     public void onSuccess(TransactionConfidence result) {
                         // "result" here is the same as "tx" above, but we use it anyway for clarity.
                         try {
-                            forwardCoins(result, kit);
+                            System.out.println("Transactions confirmed in new block.");
+                            forwardCoins(result, kit, tx);
+                            System.out.println("Wallet success: " + kit.wallet().getBalance());
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -92,19 +94,32 @@ public class WalletJ {
             }
         });
 
+        if (kit.wallet() != null) {
+            Wallet wallet = kit.wallet();
+            System.out.println("Kit Wallet Balance: " + wallet.getBalance());
+            System.out.println("Kit Wallet Address: " + wallet.currentReceiveAddress());
 
-
-            System.out.println(kit.wallet().getDescription());
-            while(true);
+        }
+        while(true);
     }
 
-    void forwardCoins(TransactionConfidence tx, WalletAppKit kit)throws  Exception{
-        Coin value = tx.getOverridingTransaction().getValueSentToMe(kit.wallet());
+    void forwardCoins(TransactionConfidence tx, WalletAppKit kit, Transaction transaction) {
+        Transaction overridingTransaction;
+        System.out.println("Transcation type: " + tx.getConfidenceType().toString());
+
+        Coin value = transaction.getValueSentToMe(kit.wallet());
         System.out.println("Forwarding " + value.toFriendlyString() + " BTC");
+
+        System.out.println("Wallet balance " + kit.wallet().getBalance());
+
 // Now send the coins back! Send with a small fee attached to ensure rapid confirmation.
         final Coin amountToSend = value.subtract(Transaction.REFERENCE_DEFAULT_MIN_TX_FEE);
-        final org.bitcoinj.wallet.Wallet.SendResult sendResult = kit.wallet().sendCoins(kit.peerGroup(), new Address(params, ""), amountToSend);
-        System.out.println("Sending ...");
+        try {
+            Address address = new Address(params, "mgpr1udbnBLXW7FUntEvDQ4CgLvkP57jya");
+            final Wallet.SendResult sendResult = kit.wallet().sendCoins(kit.peerGroup(), address, amountToSend);
+        } catch (InsufficientMoneyException e) {
+            e.printStackTrace();
+        }
 // Register a callback that is invoked when the transaction has propagated across the network.
 // This shows a second style of registering ListenableFuture callbacks, it works when you don't
 // need access to the object the future returns.

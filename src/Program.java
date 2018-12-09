@@ -1,23 +1,14 @@
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
 import org.bitcoinj.core.*;
 import org.bitcoinj.core.listeners.OnTransactionBroadcastListener;
 import org.bitcoinj.kits.WalletAppKit;
-import org.bitcoinj.net.discovery.DnsDiscovery;
 import org.bitcoinj.params.RegTestParams;
-import org.bitcoinj.params.TestNet3Params;
 import org.bitcoinj.store.BlockStore;
-import org.bitcoinj.store.BlockStoreException;
 import org.bitcoinj.store.MemoryBlockStore;
 import org.bitcoinj.utils.BriefLogFormatter;
-import org.bitcoinj.utils.MonetaryFormat;
+import org.bitcoinj.wallet.Protos;
 import org.bitcoinj.wallet.Wallet;
-import org.bitcoinj.wallet.listeners.WalletCoinsReceivedEventListener;
 
-import java.io.File;
 import java.net.InetAddress;
-import java.util.List;
-import java.util.concurrent.Future;
 
 /**
  * <p>Downloads the block given a block hash from the remote or localhost node and prints it out.</p>
@@ -27,10 +18,10 @@ import java.util.concurrent.Future;
  */
 
 public class Program {
-    static Transaction tx;
+
 
     public static void main(String[] args) throws Exception {
         Server server = new Server();
-        //WalletJ w = new WalletJ();
+        WalletE w = new WalletE();
     }
 }
