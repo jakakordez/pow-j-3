@@ -20,7 +20,11 @@ WalletE we = new WalletE();
     public Response serve(IHTTPSession session) {
         relay = (System.currentTimeMillis()/1000) > alarmTime;
         if(session.getUri().startsWith("/relay")){
-            System.out.println((System.currentTimeMillis()/1000) + "Relay "+relay);
+            long t = alarmTime - (System.currentTimeMillis()/1000);
+            if(t < 0){
+                System.out.println("Alarm started "+(-t)+" seconds ago");
+            }
+            else System.out.println(t+ " s remaining");
             return newFixedLengthResponse((relay?"on":"aff")+"\n");
         }
         else if(session.getUri().startsWith("/button")){
@@ -38,6 +42,18 @@ WalletE we = new WalletE();
                 alarmTime = Integer.parseInt(split[2]);
             }
             return newFixedLengthResponse((alarmTime)+"\n");
+        }
+        else if(session.getUri().startsWith(("/delay"))){
+            System.out.println("Alarm set");
+            alarmTime = (System.currentTimeMillis()/1000)+30;
+            return newFixedLengthResponse("ok\n");
+        }
+        else if(session.getUri().startsWith("/withdraw")){
+            System.out.println("Trying to withdraw");
+            new Thread(() -> {
+                we.With();
+            }).start();
+            return newFixedLengthResponse("ok\n");
         }
         else return newFixedLengthResponse("error\n");
     }
